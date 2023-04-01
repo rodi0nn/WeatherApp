@@ -8,20 +8,40 @@
 import SwiftUI
 
 struct ForecastView: View {
-    var body: some View{
-        GeometryReader { geo in
+    
+    @EnvironmentObject var dataModel: DataModel
+    
+    var body: some View {
+        ZStack {
+            Image("background")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+            
             VStack {
-                Text("Forecast")
+                
+                Text(dataModel.userLocation)
+                    .padding()
+                    .lineLimit(3)
+                    .font(.title)
+                    .foregroundColor(.black)
+                    .shadow(color: .black, radius: 0.5)
+                
+                List {
+                    ForEach(dataModel.forecast?.daily ?? [], id: \.dt) {
+                        dailyForecast in
+                        DailyForecast(day: dailyForecast)
+                    }
+                }
             }
-            .frame(width: geo.size.width, height: geo.size.height)
-            .background(Image("background").resizable().scaledToFill())
-            .ignoresSafeArea()
         }
     }
 }
 
 struct Forecast_Previews: PreviewProvider {
     static var previews: some View {
+        let dataModel = DataModel()
         ForecastView()
+            .environmentObject(dataModel)
     }
 }

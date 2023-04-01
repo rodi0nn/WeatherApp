@@ -1,11 +1,12 @@
 import Foundation
 
 class DataModel: ObservableObject {
+    
     @Published var forecast: Forecast?
-    @Published var userLocation: String = ""
+    @Published var userLocation: String = "Tooley Street, London, United Kingdom"
+
     init() {
         self.forecast = load("london.json")
-        self.userLocation = "Tooley Street, London, United Kingdom"
     }
     
 

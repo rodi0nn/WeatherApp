@@ -11,16 +11,6 @@ struct WeatherNowView: View {
     
     @EnvironmentObject var dataModel: DataModel
     
-    @State var temp: Float = 0
-    @State var weatherDescription: String = "Broken Clouds"
-    @State var highTemp: Float = 0
-    @State var lowTemp: Float = 0
-    @State var feelTemp: Float = 0
-    @State var windSpeed: Int = 0
-    @State var windDirection: String = "SE"
-    @State var humidity: Int = 0
-    @State var pressure: Int = 0
-    
     var body: some View {
         GeometryReader { geo in
             VStack {
@@ -30,38 +20,35 @@ struct WeatherNowView: View {
                     .shadow(color: .black, radius: 0.5)
                     .multilineTextAlignment(.center)
                 
-                Text("\(temp, specifier: "%.1f")ºC")
+                Text("\(dataModel.forecast?.current.temp ?? 0, specifier: "%.1f")ºC")
                     .padding()
                     .font(.largeTitle)
                 
-                Label("\(weatherDescription)", systemImage: "")
-                    .padding()
-                    .font(.title3)
-                    .foregroundColor(.black)
-                    .shadow(color: .black, radius: 0.5)
+                Label("\(dataModel.forecast?.current.weather.first?.weatherDescription.rawValue.capitalized ?? "Unknown")",
+                      systemImage: "\(dataModel.forecast?.current.weather.first?.icon ?? "questionmark.circle")")
                 
                 HStack {
-                    Text("H: \(highTemp, specifier: "%.1f")ºC")
+                    Text("H: \(dataModel.forecast?.daily.first?.temp.max ?? 0, specifier: "%.1f")ºC")
                         .padding(5)
                         .font(.callout)
                         .foregroundColor(.black)
                         .shadow(color: .black, radius: 0.5)
                     
-                    Text("L: \(lowTemp, specifier: "%.1f")ºC")
+                    Text("L: \(dataModel.forecast?.daily.first?.temp.min ?? 0, specifier: "%.1f")ºC")
                         .padding(5)
                         .font(.callout)
                         .foregroundColor(.black)
                         .shadow(color: .black, radius: 0.5)
                 }
                 
-                Text("Feels like: \(feelTemp, specifier: "%.1f")ºC")
+                Text("Feels like: \(dataModel.forecast?.current.feelsLike ?? 0, specifier: "%.1f")ºC")
                     .padding(.bottom, 12.0)
                     .font(.callout)
                     .foregroundColor(.black)
                     .shadow(color: .black, radius: 0.5)
                 
                 HStack {
-                    Text("Wind Speed: \(windSpeed)m/s")
+                    Text("Wind Speed: \(dataModel.forecast?.current.windSpeed ?? 0, specifier: "%.0f")m/s")
                         .padding()
                         .font(.headline)
                         .foregroundColor(.black)
@@ -69,7 +56,7 @@ struct WeatherNowView: View {
                     
                     Spacer()
                     
-                    Text("Direction: \(windDirection)")
+                    Text("Direction: \(degreesToCardinals(deg: dataModel.forecast?.current.windDeg ?? 0))")
                         .padding()
                         .font(.headline)
                         .foregroundColor(.black)
@@ -77,7 +64,7 @@ struct WeatherNowView: View {
                 }
                 
                 HStack {
-                    Text("Humidity: \(humidity)%")
+                    Text("Humidity: \(dataModel.forecast?.current.humidity ?? 0)%")
                         .padding()
                         .font(.headline)
                         .foregroundColor(.black)
@@ -85,21 +72,22 @@ struct WeatherNowView: View {
                     
                     Spacer()
                     
-                    Text("Pressure: \(pressure) hPg")
+                    Text("Pressure: \(dataModel.forecast?.current.pressure ?? 0) hPg")
                         .padding()
                         .font(.headline)
                         .foregroundColor(.black)
                         .shadow(color: .black, radius: 0.5)
                 }
-                
+
                 HStack {
-                    Label("Sunrise", systemImage: "")
+                    Label("\(Date(timeIntervalSince1970: TimeInterval(dataModel.forecast?.daily.first?.sunrise ?? 0)).formatted(date: .omitted, time: .shortened))",
+                    systemImage: "")
                         .padding(5)
                         .font(.headline)
                         .foregroundColor(.black)
                         .shadow(color: .black, radius: 0.5)
                     
-                    Label("Sunset", systemImage: "")
+                    Label("\(Date(timeIntervalSince1970: TimeInterval(dataModel.forecast?.daily.first?.sunset ?? 0)).formatted(date: .omitted, time: .shortened))", systemImage: "")
                         .padding(5)
                         .font(.headline)
                         .foregroundColor(.black)
@@ -118,6 +106,8 @@ struct WeatherNowView: View {
 
 struct WeatherNowView_Previews: PreviewProvider {
     static var previews: some View {
+        let dataModel = DataModel()
         WeatherNowView()
+            .environmentObject(dataModel)
     }
 }

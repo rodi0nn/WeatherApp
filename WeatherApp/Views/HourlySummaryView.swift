@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HourlySummaryView: View {
     
-    @State var userLocation: String = "Londra"
+    @EnvironmentObject var dataModel: DataModel
     
     var body: some View {
         ZStack {
@@ -20,16 +20,21 @@ struct HourlySummaryView: View {
             
             VStack {
                 
-                Text("Potters Field Park, London, United Kingdom")
+                Text(dataModel.userLocation)
                     .padding()
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(3)
                     .font(.title)
                     .foregroundColor(.black)
                     .shadow(color: .black, radius: 0.5)
                 
                 List {
-                    
+                    ForEach(dataModel.forecast?.hourly ?? [], id: \.dt) {
+                        hourlySummary in
+                        HourlySummary(hour: hourlySummary)
+                            .background(Color.white)
+                    }
                 }
+                .opacity(0.7)
             }
         }
     }
@@ -37,7 +42,9 @@ struct HourlySummaryView: View {
 
 struct HourlySUmmaryView: PreviewProvider {
     static var previews: some View {
+        let dataModel = DataModel()
         HourlySummaryView()
+            .environmentObject(dataModel)
     }
 }
 

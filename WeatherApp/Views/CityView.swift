@@ -13,12 +13,6 @@ struct CityView: View {
     @EnvironmentObject var dataModel: DataModel
     
     @State var isSearchOpen: Bool = false
-    @State var userLocation: String = ""
-    @State var userDate: Date = Date(timeIntervalSince1970: 1678829219)
-    @State var temp: Float = 0
-    @State var humidity: Int = 0
-    @State var pressure: Int = 0
-    @State var weatherDescription: String = ""
     
     var body: some View {
         GeometryReader { geo in
@@ -36,7 +30,7 @@ struct CityView: View {
                         .font(.system(size: 30))
                 }
                 .sheet(isPresented: $isSearchOpen) {
-                    NewLocationView(isSearchOpen: $isSearchOpen, userLocation: $userLocation)
+                    NewLocationView(isSearchOpen: $isSearchOpen, userLocation: $dataModel.userLocation)
                 }
                 .padding()
                 Spacer()
@@ -48,7 +42,8 @@ struct CityView: View {
                     .shadow(color: .black, radius: 0.5)
                     .multilineTextAlignment(.center)
                 
-                Text(userDate.formatted(.dateTime.year().hour().month().day()))
+                Text(Date(timeIntervalSince1970: TimeInterval(((Int)(dataModel.forecast?.current.dt ?? 0))))
+                    .formatted(.dateTime.year().hour().month().day()))
                 .padding()
                 .font(.largeTitle)
                 .foregroundColor(.black)
@@ -56,25 +51,26 @@ struct CityView: View {
                 
                 Spacer()
                 
-                Text("Temp: \(temp, specifier: "%.1f")ºC")
+                Text("Temp: \(dataModel.forecast?.current.temp ?? 0, specifier: "%.1f")ºC")
                     .padding()
                     .font(.title2)
                     .foregroundColor(.black)
                     .shadow(color: .black, radius: 0.5)
                 
-                Text("Humidity: \(humidity)%")
+                Text("Humidity: \(dataModel.forecast?.current.humidity ?? 0)%")
                     .padding()
                     .font(.title2)
                     .foregroundColor(.black)
                     .shadow(color: .black, radius: 0.5)
                 
-                Text("Pressure: \(pressure)hPa")
+                Text("Pressure: \(dataModel.forecast?.current.pressure ?? 0)hPa")
                     .padding()
                     .font(.title2)
                     .foregroundColor(.black)
                     .shadow(color: .black, radius: 0.5)
                 
-                Label("\(weatherDescription)", systemImage: "")
+                Label("\(dataModel.forecast?.current.weather.first?.weatherDescription.rawValue.capitalized ?? "Unknown")",
+                      systemImage: "\(dataModel.forecast?.current.weather.first?.icon ?? "questionmark.circle")")
                     .padding()
                     .font(.title3)
                     .foregroundColor(.black)
@@ -86,7 +82,8 @@ struct CityView: View {
             .background(Image("background")
                 .resizable()
                 .scaledToFill()
-                .opacity(0.925))
+                .opacity(0.925)
+                .ignoresSafeArea())
             .ignoresSafeArea()
         }
     }
@@ -94,12 +91,8 @@ struct CityView: View {
 
 struct CityView_Preview: PreviewProvider {
     static var previews: some View {
-        CityView(
-            userLocation: "Tooley Street, London, United Kingdom",
-            userDate: Date(timeIntervalSince1970: 1678829219),
-            temp: 4.98,
-            humidity: 82,
-            pressure: 1011,
-            weatherDescription: "Broken Clouds")
+        let dataModel = DataModel()
+        CityView()
+            .environmentObject(dataModel)
     }
 }

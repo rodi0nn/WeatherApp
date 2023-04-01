@@ -8,25 +8,25 @@
 import SwiftUI
 
 struct HourlySummary: View {
+
+    var hour: Current
+    
     var body: some View {
         HStack {
             Spacer()
-            Text("date")
+            Text(Date(timeIntervalSince1970: TimeInterval((Int)(hour.dt))).formatted(.dateTime.weekday().hour()))
             
-            Spacer()
+            Image(hour.weather.first?.icon ?? "default value")
             
-            Image(systemName: "circle.fill")
-            
-            Spacer()
-            
-            Text("condition")
+            Text("\(hour.temp, specifier: "%.1f")ºC \(hour.weather.first?.weatherDescription.rawValue.capitalized ?? "Unknown")")
             Spacer()
         }
     }
 }
 
 struct HourlySummary_Previews: PreviewProvider {
+    static var dataModel = DataModel()
     static var previews: some View {
-        HourlySummary()
+        HourlySummary(hour: dataModel.forecast!.current)
     }
 }
